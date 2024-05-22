@@ -8,7 +8,7 @@ inputs:
    decryption_key:
     description: 'mule decryption key' 
 
-  runs:
+runs:
     using: "composite"
     steps:    
     - name: Checkout this repo
