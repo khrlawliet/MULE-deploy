@@ -1,0 +1,37 @@
+name: 'Deploy Mule'
+description: 'mule deployment'
+inputs:
+   anypoint_platform_username:
+    description: 'anypoint login username'
+   anypoint_platform_password:
+    description: 'anypoint login password'
+   decryption_key:
+    description: 'mule decryption key' 
+
+  runs:
+    using: "composite"
+    steps:    
+    - name: Checkout this repo
+      uses: actions/checkout@v3
+    - name: Cache dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.m2/repository
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-maven-
+    - uses: actions/download-artifact@v3
+      with:
+        name: artifacts
+    - name: Deploy to Sandbox
+      env:
+        USERNAME: ${{ inputs.anypoint_platform_username }}
+        PASSWORD: ${{ inputs.anypoint_platform_password }}
+        KEY: ${{ inputs.decryption_key }}
+      run: |
+        artifactName=$(ls *.jar | head -1)
+        mvn deploy -DmuleDeploy \
+         -Dmule.artifact=$artifactName \
+         -Danypoint.username="$USERNAME" \
+         -Danypoint.password="$PASSWORD" \
+         -Ddecryption.key="$KEY"
